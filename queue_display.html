@@ -278,7 +278,7 @@
 
   async function fetchQueue() {
     try {
-      const res = await fetch(WORKER_URL + "?t=" + Date.now());
+      const res = await fetch(WORKER_URL);
       if (!res.ok) throw new Error("HTTP " + res.status);
       const json = await res.json();
       const data = json.record;  // JSONbin 把資料包在 record 裡
