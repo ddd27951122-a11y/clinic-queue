@@ -265,9 +265,8 @@
 </div>
 
 <script>
-  // ★ 填入你的 JSONbin 資訊
-  const JSONBIN_BIN_ID     = "ccc";   // ← Bin ID
-  const JSONBIN_ACCESS_KEY = "xxxx";  // ← X-Access-Key
+  // ★ Cloudflare Worker 網址（Key 藏在 Worker 裡，安全）
+  const WORKER_URL = "https://sparkling-breeze-26b5.ddd27951122.workers.dev/";
   const REFRESH_MS = 5000;
 
   function updateClock() {
@@ -279,10 +278,7 @@
 
   async function fetchQueue() {
     try {
-      const res = await fetch(
-        `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
-        { headers: { "X-Access-Key": JSONBIN_ACCESS_KEY } }
-      );
+      const res = await fetch(WORKER_URL + "?t=" + Date.now());
       if (!res.ok) throw new Error("HTTP " + res.status);
       const json = await res.json();
       const data = json.record;  // JSONbin 把資料包在 record 裡
