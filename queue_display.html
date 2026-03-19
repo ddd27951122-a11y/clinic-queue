@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>候診看板</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --blue:        #1a6fbe;
+    --blue-light:  #e8f2fc;
+    --blue-mid:    #b8d6f0;
+    --blue-dark:   #134f8a;
+    --warm-white:  #fdfaf7;
+    --warm-gray:   #f5f0eb;
+    --text:        #1c2b3a;
+    --text-muted:  #7a92a8;
+    --green:       #2e9e6b;
+    --green-light: #eaf7f1;
+    --orange:      #e07b2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--warm-white);
+    color: var(--text);
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    padding: 28px 24px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px 24px;
+    background: #fff;
+    border: 2px solid var(--blue);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(26,111,190,0.08);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-circle {
+    width: 44px; height: 44px;
+    background: var(--blue);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--blue-dark);
+    letter-spacing: 0.05em;
+  }
+
+  header p {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .header-right { text-align: right; }
+
+  #clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--blue);
+    letter-spacing: 0.05em;
+  }
+
+  #updated-at {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 580px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border: 2px solid var(--blue);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 2px 12px rgba(26,111,190,0.07);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--blue-mid);
+  }
+
+  .panel-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .panel.current .panel-icon { background: var(--green-light); }
+  .panel.next    .panel-icon { background: var(--blue-light); }
+
+  .panel-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .panel.current .panel-title { color: var(--green); }
+  .panel.next    .panel-title { color: var(--blue); }
+
+  .number-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 56px;
+    align-items: center;
+  }
+
+  .num-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 10px;
+    line-height: 1;
+    animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    border: 2px solid;
+  }
+
+  .panel.current .num-badge {
+    color: var(--green);
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+
+  .panel.next .num-badge {
+    color: var(--blue);
+    border-color: var(--blue-mid);
+    background: var(--blue-light);
+  }
+
+  .empty-msg {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+
+  .progress-label {
+    margin-top: 14px;
+    padding: 8px 12px;
+    background: var(--warm-gray);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .progress-label strong {
+    color: var(--green);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+  }
+
+  #status-bar {
+    background: #fff;
+    border: 2px solid var(--blue);
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2.5s infinite;
+    flex-shrink: 0;
+  }
+
+  .dot.error { background: var(--orange); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-circle">🏥</div>
+    <div>
+      <h1>候診看板</h1>
+      <p>即時更新・每 5 秒自動刷新</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div id="clock">--:--:--</div>
+    <div id="updated-at">資料更新中...</div>
+  </div>
+</header>
+
+<div class="grid">
+  <div class="panel current">
+    <div class="panel-header">
+      <div class="panel-icon">✅</div>
+      <div class="panel-title">目前看診中</div>
+    </div>
+    <div class="number-list" id="current-list">
+      <span class="empty-msg">讀取中...</span>
+    </div>
+    <div class="progress-label" id="progress-label" style="display:none"></div>
+  </div>
+
+  <div class="panel next">
+    <div class="panel-header">
+      <div class="panel-icon">⏭</div>
+      <div class="panel-title">下一批候診</div>
+    </div>
+    <div class="number-list" id="next-list">
+      <span class="empty-msg">讀取中...</span>
+    </div>
+  </div>
+</div>
+
+<div id="status-bar">
+  <div class="dot" id="status-dot"></div>
+  <span id="status-msg">連線中...</span>
+</div>
+
+<script>
+  // ★ 填入你的 JSONbin 資訊
+  const JSONBIN_BIN_ID     = "ccc";   // ← Bin ID
+  const JSONBIN_ACCESS_KEY = "xxxx";  // ← X-Access-Key
+  const REFRESH_MS = 5000;
+
+  function updateClock() {
+    document.getElementById("clock").textContent =
+      new Date().toTimeString().slice(0, 8);
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  async function fetchQueue() {
+    try {
+      const res = await fetch(
+        `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
+        { headers: { "X-Access-Key": JSONBIN_ACCESS_KEY } }
+      );
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      const data = json.record;  // JSONbin 把資料包在 record 裡
+      renderQueue(data);
+      setStatus(true, "資料已同步・" + (data.updated_at || ""));
+    } catch (e) {
+      setStatus(false, "無法讀取資料：" + e.message);
+    }
+  }
+
+  function renderQueue(data) {
+    const currentEl = document.getElementById("current-list");
+    currentEl.innerHTML = (data.current && data.current.length > 0)
+      ? data.current.map(p => `<div class="num-badge">${p.tartime}</div>`).join("")
+      : `<span class="empty-msg">目前無看診號碼</span>`;
+
+    const progressEl = document.getElementById("progress-label");
+    if (data.current_max_tartime) {
+      progressEl.style.display = "block";
+      progressEl.innerHTML = `目前進度已到：<strong>${data.current_max_tartime}</strong> 號`;
+    } else {
+      progressEl.style.display = "none";
+    }
+
+    const nextEl = document.getElementById("next-list");
+    nextEl.innerHTML = (data.next5 && data.next5.length > 0)
+      ? data.next5.map(p => `<div class="num-badge">${p.tartime}</div>`).join("")
+      : `<span class="empty-msg">無候診號碼</span>`;
+
+    document.getElementById("updated-at").textContent =
+      "資料時間：" + (data.updated_at || "未知");
+  }
+
+  function setStatus(ok, msg) {
+    document.getElementById("status-dot").className = "dot" + (ok ? "" : " error");
+    document.getElementById("status-msg").textContent = msg;
+  }
+
+  fetchQueue();
+  setInterval(fetchQueue, REFRESH_MS);
+</script>
+</body>
+</html>
